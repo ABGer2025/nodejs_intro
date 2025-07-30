@@ -1,11 +1,12 @@
 {
-  "name": "nodejs_intro",
+  "name": "blog-api",
   "version": "1.0.0",
   "description": "Node.js Intro Projekt",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
