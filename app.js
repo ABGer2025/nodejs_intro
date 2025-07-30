@@ -40,9 +40,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(404, {"Content-type": "application/json"});
     res.end(JSON.stringify({message: "Endpunkt nicht gefunden" }));
   }
-
-  res.writeHead(200, {"Content-type": "text/plain"});
-  res.end("Hello Welt vom Node.js Server!");
 });
 
 server.listen(port, hostname, () =>{
