@@ -32,17 +32,34 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   }
+  
+  if (req.url === '/posts' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(posts));
+  } else if (req.url.match(/^\/posts\/(\d+)$/) && req.method === 'GET') {
+      const id = parseInt(req.url.split('/')[2]);
+      const post = posts.find(p => p.id === id);
 
-  if (req.method === 'GET' && req.url === '/posts') {
-    res.writeHead(200, {"Content-type": "application/json"});
-    res.end(JSON.stringify(posts));
-  } else {
-    res.writeHead(404, {"Content-type": "application/json"});
-    res.end(JSON.stringify({message: "Endpunkt nicht gefunden" }));
-  }
+      if (post) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(post));
+      } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ message: 'Blogbeitrag nicht gefunden' }));
+      }
+    } else if (req.url === '/posts' && req.method === 'POST') {
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Neuer Blogbeitrag empfangen (Body wird noch nicht verarbeitet)' }));
+    } else {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Endpunkt nicht gefunden' }));
+    }
 });
 
-server.listen(port, hostname, () =>{
-  console.log(`Server erfolgreich gestartet unter http://${hostname}:${port}/`);
-  console.log(`Teste den GET /posts Endpunkt unter http://${hostname}:${port}/posts`);
+server.listen(port, hostname, () => {
+    console.log(`Server läuft unter http://${hostname}:${port}/`);
+    console.log(`Testen Sie: GET http://${hostname}:${port}/posts`);
+    console.log(`Testen Sie: GET http://${hostname}:${port}/posts/1`); // Neue Testanweisung
+    console.log(`Testen Sie: GET http://${hostname}:${port}/posts/99 (für 404 Fehler)`); // Neue Testanweisung
+    console.log(`Testen Sie: POST http://${hostname}:${port}/posts (mit curl oder Postman)`);
 });
