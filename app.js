@@ -1,5 +1,5 @@
 import http from "http";
-import { readFileSync } from "fs";
+import { readFileSync } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const configPath = path.join(__dirname, "config.json");
 
-const config = JSON.parse(readFileSync(configPath, "utf-8"));
+const config = JSON.parse(await readFile(configPath, "utf-8"));
 const { hostname, port } = config;
 
 let posts = [
@@ -18,7 +18,10 @@ let posts = [
 let nextId = 3;
 
 
-const server = http.createServer((req, res) => {
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+
+const server = http.createServer(async (req, res) => {
   console.log(`Anfrage erhalten: ${req.method} ${req.url}`);
 
   // CORS-Header hinzufügen
@@ -35,6 +38,7 @@ const server = http.createServer((req, res) => {
   
   if (req.url === '/posts' && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
+      await delay(500);
       res.end(JSON.stringify(posts));
   } else if (req.url.match(/^\/posts\/(\d+)$/) && req.method === 'GET') {
       const id = parseInt(req.url.split('/')[2]);
@@ -42,6 +46,7 @@ const server = http.createServer((req, res) => {
 
       if (post) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
+          await delay(300);
           res.end(JSON.stringify(post));
       } else {
           res.writeHead(404, { 'Content-Type': 'application/json' });
