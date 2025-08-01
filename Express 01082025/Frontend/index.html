@@ -23,6 +23,12 @@
                         required
                         maxlength="100"
                     >
+                    <input 
+                        type="date" 
+                        id="todoDateInput" 
+                        title="Datum für die Aufgabe"
+                        required
+                    >
                     <button type="submit" class="add-btn">
                         <i class="fas fa-plus"></i>
                         Hinzufügen
@@ -57,6 +63,49 @@
                 </button>
             </div>
 
+            <div class="date-filters">
+                <h3>Nach Datum filtern:</h3>
+                <div class="date-filter-buttons">
+                    <button class="date-filter-btn active" data-date-filter="all">
+                        <i class="fas fa-calendar"></i> Alle Zeiten
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="today">
+                        <i class="fas fa-calendar-day"></i> Heute
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="week">
+                        <i class="fas fa-calendar-week"></i> Diese Woche
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="month">
+                        <i class="fas fa-calendar-alt"></i> Dieser Monat
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="year">
+                        <i class="fas fa-calendar"></i> Dieses Jahr
+                    </button>
+                </div>
+                
+                <div class="custom-date-filter">
+                    <select id="monthSelect">
+                        <option value="">Monat wählen...</option>
+                        <option value="0">Januar</option>
+                        <option value="1">Februar</option>
+                        <option value="2">März</option>
+                        <option value="3">April</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Dezember</option>
+                    </select>
+                    
+                    <select id="yearSelect">
+                        <option value="">Jahr wählen...</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="todo-list-container">
                 <ul class="todo-list" id="todoList">
                     <!-- Todos werden hier dynamisch eingefügt -->
@@ -80,6 +129,10 @@
                 </button>
             </div>
         </main>
+        
+        <footer class="footer">
+            <p>Made with </p>
+        </footer>
     </div>
 
     <!-- Toast Notifications -->

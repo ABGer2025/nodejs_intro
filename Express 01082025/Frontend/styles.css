@@ -23,6 +23,8 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     min-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header */
@@ -46,6 +48,7 @@ body {
 /* Main Content */
 .main {
     padding: 30px;
+    flex: 1;
 }
 
 /* Todo Form */
@@ -60,6 +63,18 @@ body {
 }
 
 #todoInput {
+    flex: 2;
+    padding: 15px 20px;
+    border: 1px solid black;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+    color: black;
+    background: white;
+}
+
+#todoDateInput {
     flex: 1;
     padding: 15px 20px;
     border: 1px solid black;
@@ -67,9 +82,13 @@ body {
     font-size: 1rem;
     transition: all 0.3s ease;
     outline: none;
+    color: black;
+    background: white;
+    min-width: 150px;
 }
 
-#todoInput:focus {
+#todoInput:focus,
+#todoDateInput:focus {
     border-color: #ffd700;
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
@@ -138,7 +157,7 @@ body {
 .filter-buttons {
     display: flex;
     gap: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
 }
 
@@ -166,6 +185,76 @@ body {
     background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
     color: black;
     border-color: transparent;
+}
+
+/* Date Filters */
+.date-filters {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid black;
+    border-radius: 12px;
+}
+
+.date-filters h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.date-filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.date-filter-btn {
+    padding: 10px 16px;
+    border: 1px solid black;
+    background: white;
+    color: #6c757d;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.date-filter-btn:hover {
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.date-filter-btn.active {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    border-color: transparent;
+}
+
+.custom-date-filter {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.custom-date-filter select {
+    padding: 10px 15px;
+    border: 1px solid black;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.custom-date-filter select:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
 }
 
 /* Todo List */
@@ -240,6 +329,26 @@ body {
     flex: 1;
     font-size: 1rem;
     word-break: break-word;
+    margin-bottom: 5px;
+}
+
+.todo-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.todo-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.todo-date i {
+    font-size: 0.8rem;
 }
 
 .todo-actions {
@@ -394,7 +503,7 @@ body {
 }
 
 /* Edit Mode */
-.todo-item.editing .todo-text {
+.todo-item.editing .todo-content {
     display: none;
 }
 
@@ -405,6 +514,8 @@ body {
     border-radius: 6px;
     font-size: 1rem;
     outline: none;
+    color: black;
+    background: white;
 }
 
 .edit-actions {
@@ -428,6 +539,26 @@ body {
 
 .cancel-btn:hover {
     background: #5a6268;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    text-align: center;
+    padding: 20px 30px;
+    margin-top: auto;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.footer p::after {
+    content: "❤";
+    color: red;
 }
 
 /* Responsive Design */
@@ -478,9 +609,27 @@ body {
         justify-content: center;
     }
     
+    .date-filter-buttons {
+        justify-content: center;
+    }
+    
+    .custom-date-filter {
+        justify-content: center;
+    }
+    
+    .custom-date-filter select {
+        min-width: 120px;
+    }
+    
     .todo-item {
         padding: 15px;
         flex-wrap: wrap;
+    }
+    
+    .todo-content {
+        order: 2;
+        width: 100%;
+        margin-bottom: 10px;
     }
     
     .todo-actions {
@@ -504,6 +653,14 @@ body {
     .toast.show {
         transform: translateY(0);
     }
+    
+    .footer {
+        padding: 15px 20px;
+    }
+    
+    .footer p {
+        font-size: 0.9rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -521,5 +678,35 @@ body {
     
     .filter-btn {
         justify-content: center;
+    }
+    
+    .date-filter-btn {
+        justify-content: center;
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+    
+    .date-filters {
+        padding: 15px;
+    }
+    
+    .date-filters h3 {
+        font-size: 1rem;
+        text-align: center;
+    }
+    
+    .date-filter-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .custom-date-filter {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .custom-date-filter select {
+        min-width: auto;
+        width: 100%;
     }
 }

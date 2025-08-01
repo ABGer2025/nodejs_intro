@@ -3,10 +3,14 @@ class TodoApp {
     constructor() {
         this.todos = JSON.parse(localStorage.getItem('todos')) || [];
         this.currentFilter = 'all';
+        this.currentDateFilter = 'all';
+        this.selectedMonth = null;
+        this.selectedYear = null;
         this.editingId = null;
         
         this.initializeElements();
         this.bindEvents();
+        this.populateYearSelect();
         this.render();
         this.updateStats();
     }
@@ -14,15 +18,22 @@ class TodoApp {
     initializeElements() {
         this.todoForm = document.getElementById('todoForm');
         this.todoInput = document.getElementById('todoInput');
+        this.todoDateInput = document.getElementById('todoDateInput');
         this.todoList = document.getElementById('todoList');
         this.emptyState = document.getElementById('emptyState');
         this.filterButtons = document.querySelectorAll('.filter-btn');
+        this.dateFilterButtons = document.querySelectorAll('.date-filter-btn');
+        this.monthSelect = document.getElementById('monthSelect');
+        this.yearSelect = document.getElementById('yearSelect');
         this.clearCompletedBtn = document.getElementById('clearCompleted');
         this.clearAllBtn = document.getElementById('clearAll');
         this.totalTodosEl = document.getElementById('totalTodos');
         this.completedTodosEl = document.getElementById('completedTodos');
         this.pendingTodosEl = document.getElementById('pendingTodos');
         this.toast = document.getElementById('toast');
+        
+        // Set default date to today
+        this.todoDateInput.value = new Date().toISOString().split('T')[0];
     }
 
     bindEvents() {
@@ -37,6 +48,22 @@ class TodoApp {
             btn.addEventListener('click', () => {
                 this.setFilter(btn.dataset.filter);
             });
+        });
+
+        // Date filter buttons
+        this.dateFilterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.setDateFilter(btn.dataset.dateFilter);
+            });
+        });
+
+        // Month and year selects
+        this.monthSelect.addEventListener('change', () => {
+            this.setCustomDateFilter();
+        });
+
+        this.yearSelect.addEventListener('change', () => {
+            this.setCustomDateFilter();
         });
 
         // Clear buttons
@@ -55,6 +82,21 @@ class TodoApp {
                 this.todoInput.focus();
             }
         });
+        
+        // Tab between input fields
+        this.todoInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && !e.shiftKey) {
+                e.preventDefault();
+                this.todoDateInput.focus();
+            }
+        });
+        
+        this.todoDateInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && e.shiftKey) {
+                e.preventDefault();
+                this.todoInput.focus();
+            }
+        });
     }
 
     generateId() {
@@ -63,24 +105,39 @@ class TodoApp {
 
     addTodo() {
         const text = this.todoInput.value.trim();
-        if (!text) return;
+        const dateValue = this.todoDateInput.value;
+        
+        if (!text) {
+            this.showToast('Bitte geben Sie eine Aufgabe ein', 'error');
+            return;
+        }
+        
+        if (!dateValue) {
+            this.showToast('Bitte wählen Sie ein Datum', 'error');
+            return;
+        }
 
         if (text.length > 100) {
             this.showToast('Aufgabe ist zu lang (max. 100 Zeichen)', 'error');
             return;
         }
 
+        // Create date from input and set to beginning of day
+        const selectedDate = new Date(dateValue + 'T00:00:00.000Z');
+
         const todo = {
             id: this.generateId(),
             text: text,
             completed: false,
-            createdAt: new Date().toISOString(),
+            createdAt: selectedDate.toISOString(),
             completedAt: null
         };
 
         this.todos.unshift(todo);
         this.todoInput.value = '';
+        // Keep the date for convenience (user might add multiple todos for same date)
         this.saveTodos();
+        this.populateYearSelect();
         this.render();
         this.updateStats();
         this.showToast('Aufgabe hinzugefügt!', 'success');
@@ -170,15 +227,154 @@ class TodoApp {
         this.render();
     }
 
+    setDateFilter(dateFilter) {
+        this.currentDateFilter = dateFilter;
+        this.selectedMonth = null;
+        this.selectedYear = null;
+        
+        // Update active date filter button
+        this.dateFilterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.dateFilter === dateFilter) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Reset custom selects
+        this.monthSelect.value = '';
+        this.yearSelect.value = '';
+        
+        this.render();
+    }
+
+    setCustomDateFilter() {
+        const month = this.monthSelect.value;
+        const year = this.yearSelect.value;
+        
+        if (month !== '' || year !== '') {
+            this.currentDateFilter = 'custom';
+            this.selectedMonth = month !== '' ? parseInt(month) : null;
+            this.selectedYear = year !== '' ? parseInt(year) : null;
+            
+            // Deactivate predefined date filter buttons
+            this.dateFilterButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            this.render();
+        }
+    }
+
+    populateYearSelect() {
+        const currentYear = new Date().getFullYear();
+        const years = [];
+        
+        // Get years from todos
+        this.todos.forEach(todo => {
+            const year = new Date(todo.createdAt).getFullYear();
+            if (!years.includes(year)) {
+                years.push(year);
+            }
+        });
+        
+        // Add current year if not present
+        if (!years.includes(currentYear)) {
+            years.push(currentYear);
+        }
+        
+        // Sort years in descending order
+        years.sort((a, b) => b - a);
+        
+        // Clear and populate year select
+        this.yearSelect.innerHTML = '<option value="">Jahr wählen...</option>';
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            this.yearSelect.appendChild(option);
+        });
+    }
+
     getFilteredTodos() {
+        let filteredTodos = this.todos;
+        
+        // Apply status filter
         switch (this.currentFilter) {
             case 'completed':
-                return this.todos.filter(todo => todo.completed);
+                filteredTodos = filteredTodos.filter(todo => todo.completed);
+                break;
             case 'pending':
-                return this.todos.filter(todo => !todo.completed);
+                filteredTodos = filteredTodos.filter(todo => !todo.completed);
+                break;
             default:
-                return this.todos;
+                // 'all' - no status filtering
+                break;
         }
+        
+        // Apply date filter
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        
+        switch (this.currentDateFilter) {
+            case 'today':
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt);
+                    const todoDay = new Date(todoDate.getFullYear(), todoDate.getMonth(), todoDate.getDate());
+                    return todoDay.getTime() === today.getTime();
+                });
+                break;
+                
+            case 'week':
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6); // End of week (Saturday)
+                
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt);
+                    const todoDay = new Date(todoDate.getFullYear(), todoDate.getMonth(), todoDate.getDate());
+                    return todoDay >= weekStart && todoDay <= weekEnd;
+                });
+                break;
+                
+            case 'month':
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt);
+                    return todoDate.getMonth() === now.getMonth() && 
+                           todoDate.getFullYear() === now.getFullYear();
+                });
+                break;
+                
+            case 'year':
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt);
+                    return todoDate.getFullYear() === now.getFullYear();
+                });
+                break;
+                
+            case 'custom':
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt);
+                    let matches = true;
+                    
+                    if (this.selectedMonth !== null) {
+                        matches = matches && todoDate.getMonth() === this.selectedMonth;
+                    }
+                    
+                    if (this.selectedYear !== null) {
+                        matches = matches && todoDate.getFullYear() === this.selectedYear;
+                    }
+                    
+                    return matches;
+                });
+                break;
+                
+            default:
+                // 'all' - no date filtering
+                break;
+        }
+        
+        return filteredTodos;
     }
 
     clearCompleted() {
@@ -264,8 +460,14 @@ class TodoApp {
                     ${todo.completed ? '<i class="fas fa-check"></i>' : ''}
                 </div>
                 
-                <div class="todo-text" title="Erstellt am: ${createdDate}">
-                    ${this.escapeHtml(todo.text)}
+                <div class="todo-content">
+                    <div class="todo-text" title="Erstellt am: ${createdDate}">
+                        ${this.escapeHtml(todo.text)}
+                    </div>
+                    <div class="todo-date">
+                        <i class="fas fa-calendar"></i>
+                        ${createdDate}
+                    </div>
                 </div>
                 
                 ${isEditing ? `
