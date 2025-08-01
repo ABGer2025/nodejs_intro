@@ -386,6 +386,13 @@ class TodoApp {
                 });
                 break;
                 
+            case 'next-year':
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt);
+                    return todoDate.getFullYear() === (now.getFullYear() + 1);
+                });
+                break;
+                
             case 'custom':
                 filteredTodos = filteredTodos.filter(todo => {
                     const todoDate = new Date(todo.createdAt);
