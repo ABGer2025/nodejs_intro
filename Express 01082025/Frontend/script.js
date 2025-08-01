@@ -1,19 +1,18 @@
 // Todo App JavaScript
 class TodoApp {
     constructor() {
-        this.todos = JSON.parse(localStorage.getItem('todos')) || [];
+        this.todos = [];
         this.currentFilter = 'all';
         this.currentDateFilter = 'all';
         this.selectedMonth = null;
         this.selectedYear = null;
         this.editingId = null;
+        this.apiBase = 'https://jsonplaceholder.typicode.com';
+        this.isLoading = false;
         
         this.initializeElements();
         this.bindEvents();
-        this.populateYearSelect();
-        this.render();
-        this.updateStats();
-        this.checkMissedBackup();
+        this.loadTodosFromAPI();
     }
 
     initializeElements() {
@@ -133,11 +132,105 @@ class TodoApp {
         });
     }
 
+    // API Methods
+    async loadTodosFromAPI() {
+        this.setLoading(true);
+        try {
+            const response = await fetch(`${this.apiBase}/todos`);
+            const apiTodos = await response.json();
+            
+            // Transform API data to our format
+            this.todos = apiTodos.slice(0, 20).map(todo => ({
+                id: todo.id.toString(),
+                text: todo.title,
+                completed: todo.completed,
+                createdAt: new Date().toISOString(),
+                completedAt: todo.completed ? new Date().toISOString() : null
+            }));
+            
+            this.populateYearSelect();
+            this.render();
+            this.updateStats();
+            this.showToast('Todos von API geladen!', 'success');
+        } catch (error) {
+            this.showToast('Fehler beim Laden der Todos', 'error');
+            console.error('API Error:', error);
+        } finally {
+            this.setLoading(false);
+            this.checkMissedBackup();
+        }
+    }
+
+    async saveTodoToAPI(todo) {
+        try {
+            const response = await fetch(`${this.apiBase}/todos`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: todo.text,
+                    completed: todo.completed,
+                    userId: 1
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            });
+            
+            const result = await response.json();
+            return { ...todo, id: result.id.toString() };
+        } catch (error) {
+            this.showToast('Fehler beim Speichern', 'error');
+            throw error;
+        }
+    }
+
+    async updateTodoInAPI(todo) {
+        try {
+            const response = await fetch(`${this.apiBase}/todos/${todo.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    id: parseInt(todo.id),
+                    title: todo.text,
+                    completed: todo.completed,
+                    userId: 1
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            });
+            
+            return await response.json();
+        } catch (error) {
+            this.showToast('Fehler beim Aktualisieren', 'error');
+            throw error;
+        }
+    }
+
+    async deleteTodoFromAPI(id) {
+        try {
+            await fetch(`${this.apiBase}/todos/${id}`, {
+                method: 'DELETE',
+            });
+        } catch (error) {
+            this.showToast('Fehler beim Löschen', 'error');
+            throw error;
+        }
+    }
+
+    setLoading(isLoading) {
+        this.isLoading = isLoading;
+        // You can add loading spinner logic here
+        const addBtn = document.querySelector('.add-btn');
+        if (addBtn) {
+            addBtn.disabled = isLoading;
+            addBtn.textContent = isLoading ? 'Laden...' : 'Hinzufügen';
+        }
+    }
+
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
-    addTodo() {
+    async addTodo() {
         const text = this.todoInput.value.trim();
         const dateValue = this.todoDateInput.value;
         
@@ -156,6 +249,8 @@ class TodoApp {
             return;
         }
 
+        this.setLoading(true);
+
         // Create date from input and set to beginning of day
         const selectedDate = new Date(dateValue + 'T00:00:00.000Z');
 
@@ -167,38 +262,54 @@ class TodoApp {
             completedAt: null
         };
 
-        this.todos.unshift(todo);
-        this.todoInput.value = '';
-        // Keep the date for convenience (user might add multiple todos for same date)
-        this.saveTodos();
-        this.populateYearSelect();
-        this.render();
-        this.updateStats();
-        this.showToast('Aufgabe hinzugefügt!', 'success');
+        try {
+            const savedTodo = await this.saveTodoToAPI(todo);
+            this.todos.unshift(savedTodo);
+            this.todoInput.value = '';
+            this.populateYearSelect();
+            this.render();
+            this.updateStats();
+            this.showToast('Aufgabe hinzugefügt!', 'success');
+        } catch (error) {
+            console.error('Error adding todo:', error);
+        } finally {
+            this.setLoading(false);
+        }
     }
 
-    toggleTodo(id) {
+    async toggleTodo(id) {
         const todo = this.todos.find(t => t.id === id);
         if (!todo) return;
 
         todo.completed = !todo.completed;
         todo.completedAt = todo.completed ? new Date().toISOString() : null;
         
-        this.saveTodos();
-        this.render();
-        this.updateStats();
-        
-        const message = todo.completed ? 'Aufgabe erledigt!' : 'Aufgabe wieder geöffnet!';
-        this.showToast(message, 'success');
-    }
-
-    deleteTodo(id) {
-        if (confirm('Möchten Sie diese Aufgabe wirklich löschen?')) {
-            this.todos = this.todos.filter(t => t.id !== id);
-            this.saveTodos();
+        try {
+            await this.updateTodoInAPI(todo);
             this.render();
             this.updateStats();
-            this.showToast('Aufgabe gelöscht!', 'info');
+            
+            const message = todo.completed ? 'Aufgabe erledigt!' : 'Aufgabe wieder geöffnet!';
+            this.showToast(message, 'success');
+        } catch (error) {
+            // Revert change on error
+            todo.completed = !todo.completed;
+            todo.completedAt = todo.completed ? new Date().toISOString() : null;
+            console.error('Error toggling todo:', error);
+        }
+    }
+
+    async deleteTodo(id) {
+        if (confirm('Möchten Sie diese Aufgabe wirklich löschen?')) {
+            try {
+                await this.deleteTodoFromAPI(id);
+                this.todos = this.todos.filter(t => t.id !== id);
+                this.render();
+                this.updateStats();
+                this.showToast('Aufgabe gelöscht!', 'info');
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
         }
     }
 
@@ -217,7 +328,7 @@ class TodoApp {
         }
     }
 
-    saveTodoEdit(id) {
+    async saveTodoEdit(id) {
         const editInput = document.querySelector(`[data-id="${id}"] .edit-input`);
         if (!editInput) return;
 
@@ -234,11 +345,19 @@ class TodoApp {
 
         const todo = this.todos.find(t => t.id === id);
         if (todo) {
+            const oldText = todo.text;
             todo.text = newText;
-            this.saveTodos();
-            this.editingId = null;
-            this.render();
-            this.showToast('Aufgabe aktualisiert!', 'success');
+            
+            try {
+                await this.updateTodoInAPI(todo);
+                this.editingId = null;
+                this.render();
+                this.showToast('Aufgabe aktualisiert!', 'success');
+            } catch (error) {
+                // Revert change on error
+                todo.text = oldText;
+                console.error('Error updating todo:', error);
+            }
         }
     }
 
@@ -418,34 +537,54 @@ class TodoApp {
         return filteredTodos;
     }
 
-    clearCompleted() {
-        const completedCount = this.todos.filter(t => t.completed).length;
+    async clearCompleted() {
+        const completedTodos = this.todos.filter(t => t.completed);
+        const completedCount = completedTodos.length;
+        
         if (completedCount === 0) {
             this.showToast('Keine erledigten Aufgaben vorhanden', 'info');
             return;
         }
 
         if (confirm(`Möchten Sie ${completedCount} erledigte Aufgabe(n) löschen?`)) {
-            this.todos = this.todos.filter(t => !t.completed);
-            this.saveTodos();
-            this.render();
-            this.updateStats();
-            this.showToast(`${completedCount} erledigte Aufgabe(n) gelöscht!`, 'info');
+            try {
+                // Delete each completed todo from API
+                for (const todo of completedTodos) {
+                    await this.deleteTodoFromAPI(todo.id);
+                }
+                
+                this.todos = this.todos.filter(t => !t.completed);
+                this.render();
+                this.updateStats();
+                this.showToast(`${completedCount} erledigte Aufgabe(n) gelöscht!`, 'info');
+            } catch (error) {
+                this.showToast('Fehler beim Löschen', 'error');
+                console.error('Error clearing completed todos:', error);
+            }
         }
     }
 
-    clearAll() {
+    async clearAll() {
         if (this.todos.length === 0) {
             this.showToast('Keine Aufgaben vorhanden', 'info');
             return;
         }
 
         if (confirm(`Möchten Sie alle ${this.todos.length} Aufgabe(n) löschen?`)) {
-            this.todos = [];
-            this.saveTodos();
-            this.render();
-            this.updateStats();
-            this.showToast('Alle Aufgaben gelöscht!', 'info');
+            try {
+                // Delete each todo from API
+                for (const todo of this.todos) {
+                    await this.deleteTodoFromAPI(todo.id);
+                }
+                
+                this.todos = [];
+                this.render();
+                this.updateStats();
+                this.showToast('Alle Aufgaben gelöscht!', 'info');
+            } catch (error) {
+                this.showToast('Fehler beim Löschen', 'error');
+                console.error('Error clearing all todos:', error);
+            }
         }
     }
 
@@ -598,7 +737,9 @@ class TodoApp {
         return div.innerHTML;
     }
 
+    // Keep localStorage for app settings (backup dates, etc.)
     saveTodos() {
+        // For offline backup, still save to localStorage
         localStorage.setItem('todos', JSON.stringify(this.todos));
     }
 
