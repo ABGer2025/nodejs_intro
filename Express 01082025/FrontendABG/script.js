@@ -177,7 +177,7 @@ class TodoApp {
             completedAt: null
         };
 
-        this.todos.unshift(todo);
+        this.todos.push(todo);
         this.todoInput.value = '';
         this.saveTodos();
         this.populateYearSelect();
@@ -228,11 +228,19 @@ class TodoApp {
 
     saveTodoEdit(id) {
         const editInput = document.querySelector(`[data-id="${id}"] .edit-input`);
-        if (!editInput) return;
+        const editDateInput = document.querySelector(`[data-id="${id}"] .edit-date-input`);
+        if (!editInput || !editDateInput) return;
 
         const newText = editInput.value.trim();
+        const newDateValue = editDateInput.value;
+        
         if (!newText) {
             this.showToast('Aufgabe darf nicht leer sein', 'error');
+            return;
+        }
+
+        if (!newDateValue) {
+            this.showToast('Bitte wählen Sie ein Datum', 'error');
             return;
         }
 
@@ -244,10 +252,17 @@ class TodoApp {
         const todo = this.todos.find(t => t.id === id);
         if (todo) {
             todo.text = newText;
+            
+            // Update the date if it has changed
+            const selectedDate = new Date(newDateValue + 'T00:00:00.000Z');
+            todo.createdAt = selectedDate.toISOString();
+            
             this.saveTodos();
             this.editingId = null;
+            this.populateYearSelect(); // Update year select in case year changed
             this.render();
-            this.showToast('Aufgabe aktualisiert!', 'success');
+            this.updateStats();
+            this.showToast('Aufgabe und Datum aktualisiert!', 'success');
         }
     }
 
@@ -340,6 +355,13 @@ class TodoApp {
 
     getFilteredTodos() {
         let filteredTodos = this.todos;
+        
+        // Sort todos by date (ascending - oldest first)
+        filteredTodos = filteredTodos.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateA - dateB;
+        });
         
         // Apply status filter
         switch (this.currentFilter) {
@@ -503,6 +525,7 @@ class TodoApp {
     createTodoHTML(todo) {
         const isEditing = this.editingId === todo.id;
         const createdDate = new Date(todo.createdAt).toLocaleDateString('de-DE');
+        const editDateValue = new Date(todo.createdAt).toISOString().split('T')[0]; // YYYY-MM-DD format for input
         
         return `
             <li class="todo-item ${todo.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}" data-id="${todo.id}">
@@ -521,14 +544,17 @@ class TodoApp {
                 </div>
                 
                 ${isEditing ? `
-                    <input type="text" class="edit-input" value="${this.escapeHtml(todo.text)}" maxlength="100">
-                    <div class="edit-actions">
-                        <button class="todo-btn save-btn" data-action="save" title="Speichern">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button class="todo-btn cancel-btn" data-action="cancel" title="Abbrechen">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="edit-form">
+                        <input type="text" class="edit-input" value="${this.escapeHtml(todo.text)}" maxlength="100" placeholder="Aufgabe bearbeiten...">
+                        <input type="date" class="edit-date-input" value="${editDateValue}" title="Datum ändern">
+                        <div class="edit-actions">
+                            <button class="todo-btn save-btn" data-action="save" title="Speichern">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="todo-btn cancel-btn" data-action="cancel" title="Abbrechen">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                 ` : `
                     <div class="todo-actions">
@@ -580,6 +606,8 @@ class TodoApp {
 
         // Edit input events
         const editInput = todoElement.querySelector('.edit-input');
+        const editDateInput = todoElement.querySelector('.edit-date-input');
+        
         if (editInput) {
             editInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -587,13 +615,47 @@ class TodoApp {
                     this.saveTodoEdit(id);
                 } else if (e.key === 'Escape') {
                     this.cancelEdit();
+                } else if (e.key === 'Tab' && !e.shiftKey) {
+                    // Move to date input when pressing Tab
+                    if (editDateInput) {
+                        e.preventDefault();
+                        editDateInput.focus();
+                    }
                 }
             });
             
             editInput.addEventListener('blur', () => {
-                // Small delay to allow save button click to register
+                // Small delay to allow save button click or date input focus to register
                 setTimeout(() => {
-                    if (this.editingId === id) {
+                    if (this.editingId === id && document.activeElement !== editDateInput && 
+                        !document.activeElement.closest('.edit-actions')) {
+                        this.cancelEdit();
+                    }
+                }, 150);
+            });
+        }
+        
+        if (editDateInput) {
+            editDateInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.saveTodoEdit(id);
+                } else if (e.key === 'Escape') {
+                    this.cancelEdit();
+                } else if (e.key === 'Tab' && e.shiftKey) {
+                    // Move back to text input when pressing Shift+Tab
+                    if (editInput) {
+                        e.preventDefault();
+                        editInput.focus();
+                    }
+                }
+            });
+            
+            editDateInput.addEventListener('blur', () => {
+                // Small delay to allow save button click or text input focus to register
+                setTimeout(() => {
+                    if (this.editingId === id && document.activeElement !== editInput && 
+                        !document.activeElement.closest('.edit-actions')) {
                         this.cancelEdit();
                     }
                 }, 150);
