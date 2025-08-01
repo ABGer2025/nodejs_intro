@@ -1,0 +1,740 @@
+/* Reset und Basis-Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    min-height: 100vh;
+    padding: 10px 20px 20px 20px;
+}
+
+/* Backup Reminder - Separate top box */
+.backup-reminder {
+    background: #ffebee;
+    color: #d32f2f;
+    padding: 15px 20px;
+    border: 2px solid #d32f2f;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin: 0 auto 20px auto;
+    max-width: 800px;
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid black;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header i {
+    margin-right: 10px;
+}
+
+/* Main Content */
+.main {
+    padding: 30px;
+    flex: 1;
+}
+
+/* Todo Form */
+.todo-form {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+#todoInput {
+    flex: 2;
+    padding: 15px 20px;
+    border: 1px solid black;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+    color: black;
+    background: white;
+}
+
+#todoDateInput {
+    flex: 1;
+    padding: 15px 20px;
+    border: 1px solid black;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+    color: black;
+    background: white;
+    min-width: 150px;
+}
+
+#todoInput:focus,
+#todoDateInput:focus {
+    border-color: #ffd700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+
+.add-btn {
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+.add-btn:active {
+    transform: translateY(0);
+}
+
+/* Statistics */
+.todo-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat {
+    background: #f8f9fa;
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffd700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Filter Buttons */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 20px;
+    border: 1px solid black;
+    background: white;
+    color: #6c757d;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn:hover {
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    border-color: transparent;
+}
+
+/* Date Filters */
+.date-filters {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid black;
+    border-radius: 12px;
+}
+
+.date-filters h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.date-filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.date-filter-btn {
+    padding: 8px 12px;
+    border: 1px solid black;
+    background: white;
+    color: #6c757d;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    min-width: auto;
+    flex-shrink: 0;
+}
+
+.date-filter-btn:hover {
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.date-filter-btn.active {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    border-color: transparent;
+}
+
+.custom-date-filter {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.custom-date-filter select {
+    padding: 8px 12px;
+    border: 1px solid black;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: white;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.custom-date-filter select:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
+/* Todo List */
+.todo-list-container {
+    min-height: 300px;
+    position: relative;
+}
+
+.todo-list {
+    list-style: none;
+}
+
+.todo-item {
+    background: white;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.todo-item:hover {
+    border-color: #ffd700;
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+}
+
+.todo-item.completed {
+    background: #f8f9fa;
+    border-color: #28a745;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+.todo-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 1px solid black;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.todo-checkbox.checked {
+    background: #28a745;
+    border-color: #28a745;
+    color: black;
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1rem;
+    word-break: break-word;
+    margin-bottom: 5px;
+}
+
+.todo-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.todo-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.todo-date i {
+    font-size: 0.8rem;
+}
+
+.todo-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.todo-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: black;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+    transform: scale(1.1);
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: black;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+    display: none;
+}
+
+.empty-state.show {
+    display: block;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.empty-state p {
+    font-size: 1rem;
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.clear-btn {
+    padding: 12px 20px;
+    border: 1px solid black;
+    background: white;
+    color: #6c757d;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clear-btn:hover {
+    background: #6c757d;
+    color: black;
+}
+
+.clear-btn.danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.clear-btn.danger:hover {
+    background: #dc3545;
+    color: black;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid black;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    max-width: 350px;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-icon {
+    font-size: 1.2rem;
+}
+
+.toast-message {
+    font-weight: 500;
+}
+
+.toast.success .toast-icon {
+    color: #28a745;
+}
+
+.toast.error .toast-icon {
+    color: #dc3545;
+}
+
+.toast.info .toast-icon {
+    color: #007bff;
+}
+
+/* Edit Mode */
+.todo-item.editing .todo-content {
+    display: none;
+}
+
+.edit-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid black;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    color: black;
+    background: white;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.save-btn {
+    background: #28a745;
+    color: black;
+}
+
+.save-btn:hover {
+    background: #218838;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: black;
+}
+
+.cancel-btn:hover {
+    background: #5a6268;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: black;
+    text-align: center;
+    padding: 20px 30px;
+    margin-top: auto;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.footer p::after {
+    content: "❤";
+    color: red;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 5px 10px 10px 10px;
+    }
+    
+    .backup-reminder {
+        font-size: 1rem;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+    }
+    
+    .container {
+        border-radius: 15px;
+        min-height: calc(100vh - 80px);
+    }
+    
+    .header {
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .main {
+        padding: 20px;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .add-btn {
+        justify-content: center;
+    }
+    
+    .todo-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    
+    .stat {
+        padding: 15px 10px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .filter-buttons {
+        justify-content: center;
+    }
+    
+    .date-filter-buttons {
+        justify-content: center;
+    }
+    
+    .custom-date-filter {
+        justify-content: center;
+    }
+    
+    .custom-date-filter select {
+        min-width: 120px;
+    }
+    
+    .todo-item {
+        padding: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .todo-content {
+        order: 2;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .todo-actions {
+        order: 3;
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+    
+    .toast {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        transform: translateY(-100px);
+    }
+    
+    .toast.show {
+        transform: translateY(0);
+    }
+    
+    .footer {
+        padding: 15px 20px;
+    }
+    
+    .footer p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .todo-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-buttons {
+        flex-direction: column;
+    }
+    
+    .filter-btn {
+        justify-content: center;
+    }
+    
+    .date-filter-btn {
+        justify-content: center;
+        font-size: 0.7rem;
+        padding: 6px 10px;
+    }
+    
+    .date-filters {
+        padding: 15px;
+    }
+    
+    .date-filters h3 {
+        font-size: 1rem;
+        text-align: center;
+    }
+    
+    .date-filter-buttons {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 6px;
+    }
+    
+    .custom-date-filter {
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .custom-date-filter select {
+        min-width: 100px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+}

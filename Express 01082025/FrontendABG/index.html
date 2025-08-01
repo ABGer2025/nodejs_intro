@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="backup-reminder">
+        Speichern durch Exportieren der ToDos nicht vergessen!
+    </div>
+    
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-tasks"></i> Meine Todo-App</h1>
+        </header>
+
+        <main class="main">
+            <form class="todo-form" id="todoForm">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="todoInput" 
+                        placeholder="Neue Aufgabe hinzufügen..." 
+                        required
+                        maxlength="100"
+                    >
+                    <input 
+                        type="date" 
+                        id="todoDateInput" 
+                        title="Datum für die Aufgabe"
+                        required
+                    >
+                    <button type="submit" class="add-btn">
+                        <i class="fas fa-plus"></i>
+                        Hinzufügen
+                    </button>
+                </div>
+            </form>
+
+            <div class="todo-stats">
+                <div class="stat">
+                    <span class="stat-number" id="totalTodos">0</span>
+                    <span class="stat-label">Gesamt</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="completedTodos">0</span>
+                    <span class="stat-label">Erledigt</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="pendingTodos">0</span>
+                    <span class="stat-label">Offen</span>
+                </div>
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-list"></i> Alle
+                </button>
+                <button class="filter-btn" data-filter="pending">
+                    <i class="fas fa-clock"></i> Offen
+                </button>
+                <button class="filter-btn" data-filter="completed">
+                    <i class="fas fa-check"></i> Erledigt
+                </button>
+            </div>
+
+            <div class="date-filters">
+                <h3>Nach Datum filtern:</h3>
+                <div class="date-filter-buttons">
+                    <button class="date-filter-btn active" data-date-filter="all">
+                        <i class="fas fa-calendar"></i> Alle Zeiten
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="today">
+                        <i class="fas fa-calendar-day"></i> Heute
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="week">
+                        <i class="fas fa-calendar-week"></i> Diese Woche
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="month">
+                        <i class="fas fa-calendar-alt"></i> Dieser Monat
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="year">
+                        <i class="fas fa-calendar"></i> Dieses Jahr
+                    </button>
+                    <button class="date-filter-btn" data-date-filter="next-year">
+                        <i class="fas fa-calendar-plus"></i> Nächstes Jahr
+                    </button>
+                </div>
+                
+                <div class="custom-date-filter">
+                    <select id="monthSelect">
+                        <option value="">Monat wählen...</option>
+                        <option value="0">Januar</option>
+                        <option value="1">Februar</option>
+                        <option value="2">März</option>
+                        <option value="3">April</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Dezember</option>
+                    </select>
+                    
+                    <select id="yearSelect">
+                        <option value="">Jahr wählen...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="todo-list-container">
+                <ul class="todo-list" id="todoList">
+                    <!-- Todos werden hier dynamisch eingefügt -->
+                </ul>
+                
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Keine Aufgaben vorhanden</h3>
+                    <p>Fügen Sie Ihre erste Aufgabe hinzu, um loszulegen!</p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="clear-btn" id="exportTodos">
+                    <i class="fas fa-download"></i>
+                    Exportieren
+                </button>
+                <label class="clear-btn" for="importTodos" style="cursor: pointer; margin: 0;">
+                    <i class="fas fa-upload"></i>
+                    Importieren
+                    <input type="file" id="importTodos" accept=".json" style="display: none;">
+                </label>
+                <button class="clear-btn" id="clearCompleted">
+                    <i class="fas fa-trash"></i>
+                    Erledigte löschen
+                </button>
+                <button class="clear-btn danger" id="clearAll">
+                    <i class="fas fa-trash-alt"></i>
+                    Alle löschen
+                </button>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>Made with </p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
