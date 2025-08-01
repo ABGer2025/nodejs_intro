@@ -8,6 +8,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <div class="backup-reminder">
+        Speichern durch Exportieren der ToDos nicht vergessen!
+    </div>
+    
     <div class="container">
         <header class="header">
             <h1><i class="fas fa-tasks"></i> Meine Todo-App</h1>
@@ -119,6 +123,15 @@
             </div>
 
             <div class="actions">
+                <button class="clear-btn" id="exportTodos">
+                    <i class="fas fa-download"></i>
+                    Exportieren
+                </button>
+                <label class="clear-btn" for="importTodos" style="cursor: pointer; margin: 0;">
+                    <i class="fas fa-upload"></i>
+                    Importieren
+                    <input type="file" id="importTodos" accept=".json" style="display: none;">
+                </label>
                 <button class="clear-btn" id="clearCompleted">
                     <i class="fas fa-trash"></i>
                     Erledigte löschen

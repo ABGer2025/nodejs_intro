@@ -13,6 +13,7 @@ class TodoApp {
         this.populateYearSelect();
         this.render();
         this.updateStats();
+        this.checkMissedBackup();
     }
 
     initializeElements() {
@@ -27,6 +28,8 @@ class TodoApp {
         this.yearSelect = document.getElementById('yearSelect');
         this.clearCompletedBtn = document.getElementById('clearCompleted');
         this.clearAllBtn = document.getElementById('clearAll');
+        this.exportTodosBtn = document.getElementById('exportTodos');
+        this.importTodosInput = document.getElementById('importTodos');
         this.totalTodosEl = document.getElementById('totalTodos');
         this.completedTodosEl = document.getElementById('completedTodos');
         this.pendingTodosEl = document.getElementById('pendingTodos');
@@ -75,6 +78,20 @@ class TodoApp {
             this.clearAll();
         });
 
+        // Export/Import buttons
+        this.exportTodosBtn.addEventListener('click', () => {
+            this.exportTodos();
+        });
+
+        this.importTodosInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.importTodos(file);
+                // Reset the input so the same file can be selected again
+                e.target.value = '';
+            }
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'a') {
@@ -96,6 +113,23 @@ class TodoApp {
                 e.preventDefault();
                 this.todoInput.focus();
             }
+        });
+
+        // Backup reminder on browser close
+        window.addEventListener('beforeunload', (e) => {
+            this.handleBackupReminderOnClose(e);
+        });
+
+        // Additional event for page visibility changes (when tab is hidden/closed)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                this.checkBackupOnHidden();
+            }
+        });
+
+        // Detect when user is about to leave the page
+        window.addEventListener('pagehide', (e) => {
+            this.handleBackupReminderOnClose(e);
         });
     }
 
@@ -594,13 +628,23 @@ class TodoApp {
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         
+        // Create detailed filename with date and time
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+        const todoCount = this.todos.length;
+        
         const link = document.createElement('a');
         link.href = url;
-        link.download = `todos-${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `todos-backup-${dateStr}_${timeStr}-${todoCount}aufgaben.json`;
         link.click();
         
         URL.revokeObjectURL(url);
-        this.showToast('Todos exportiert!', 'success');
+        
+        // Mark backup as done for today
+        this.markBackupDone();
+        
+        this.showToast(`${todoCount} Aufgaben exportiert! ✅ Backup für heute erledigt.`, 'success');
     }
 
     importTodos(file) {
@@ -622,6 +666,73 @@ class TodoApp {
             }
         };
         reader.readAsText(file);
+    }
+
+    // Handle backup reminder when browser is closing
+    handleBackupReminderOnClose(e) {
+        const lastBackup = localStorage.getItem('lastBackupDate');
+        const now = new Date().toDateString(); // Today's date as string
+        
+        // Check if user has todos and hasn't backed up today
+        if (this.todos.length > 0 && lastBackup !== now) {
+            // For Firefox compatibility - show alert first
+            const shouldBackup = confirm(`⚠️ BACKUP-ERINNERUNG ⚠️\n\nSie haben ${this.todos.length} Aufgabe(n), aber heute noch kein Backup erstellt!\n\nMöchten Sie Ihre Aufgaben jetzt sichern?\n\n✅ OK = Backup erstellen\n❌ Abbrechen = Ohne Backup schließen`);
+            
+            if (shouldBackup) {
+                // Prevent the page from closing
+                e.preventDefault();
+                e.returnValue = '';
+                
+                // Trigger export automatically
+                this.exportTodos();
+                
+                // Show message that they can now close safely
+                setTimeout(() => {
+                    alert('✅ Backup erstellt! Sie können den Browser jetzt sicher schließen.');
+                }, 500);
+                
+                return false;
+            }
+        }
+    }
+
+    // Check backup when tab becomes hidden (Firefox/Chrome compatibility)
+    checkBackupOnHidden() {
+        const lastBackup = localStorage.getItem('lastBackupDate');
+        const now = new Date().toDateString();
+        
+        if (this.todos.length > 0 && lastBackup !== now) {
+            // Store a flag that backup reminder was needed
+            localStorage.setItem('backupReminderNeeded', 'true');
+        }
+    }
+
+    // Check if user missed a backup opportunity
+    checkMissedBackup() {
+        const backupNeeded = localStorage.getItem('backupReminderNeeded');
+        const lastBackup = localStorage.getItem('lastBackupDate');
+        const today = new Date().toDateString();
+        
+        // If backup was needed and still no backup today
+        if (backupNeeded === 'true' && lastBackup !== today && this.todos.length > 0) {
+            setTimeout(() => {
+                const shouldBackup = confirm(`🔔 VERPASSTE BACKUP-ERINNERUNG!\n\nSie haben den Browser geschlossen, ohne ein Backup zu erstellen.\n\nSie haben ${this.todos.length} Aufgabe(n).\n\nMöchten Sie jetzt ein Backup erstellen?`);
+                
+                if (shouldBackup) {
+                    this.exportTodos();
+                }
+                
+                // Clear the reminder flag
+                localStorage.removeItem('backupReminderNeeded');
+            }, 1000);
+        }
+    }
+
+    // Call this when user successfully exports
+    markBackupDone() {
+        const now = new Date().toDateString();
+        localStorage.setItem('lastBackupDate', now);
+        localStorage.removeItem('backupReminderNeeded');
     }
 }
 
